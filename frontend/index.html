@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +17,9 @@
     <h1>ESP32 Web Compiler</h1>
     <textarea id="code" placeholder="Masukkan kode C++ di sini..."></textarea><br>
     <button id="compileButton" onclick="generateBin()">Generate .bin</button>
-    
+    <p id="status"></p>
+    <a id="downloadLink" download="firmware.bin"></a>
+
     <script>
         async function generateBin() {
             const code = document.getElementById("code").value;
@@ -55,7 +56,7 @@
                 // Tampilkan link download
                 downloadLink.href = url;
                 downloadLink.style.display = "inline-block";
-                downloadLink.innerText = "Download .bin";
+                downloadLink.innerText = "";
 
                 // Otomatis download file setelah kompilasi berhasil
                 const a = document.createElement('a');

@@ -37,7 +37,7 @@ const isCommandAvailable = async (command) => {
 const checkAndInstallPlatformIO = async () => {
     console.log("Mengecek Python dan PlatformIO...");
 
-    const pythonAvailable = await isCommandAvailable("python3");
+    const pythonAvailable = await isCommandAvailable("python");
     if (!pythonAvailable) {
         throw new Error("Python3 tidak ditemukan! Silakan install Python3 terlebih dahulu.");
     }
