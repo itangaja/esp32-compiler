@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Web Compiler</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; }
+        textarea { width: 80%; height: 200px; font-size: 14px; padding: 10px; }
+        button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        #status { font-weight: bold; margin-top: 10px; }
+        #downloadLink { display: none; margin-top: 10px; font-size: 16px; text-decoration: none; color: blue; }
+    </style>
+</head>
+<body>
+    <h1>ESP32 Web Compiler</h1>
+    <textarea id="code" placeholder="Masukkan kode C++ di sini..."></textarea><br>
+    <button id="compileButton" onclick="generateBin()">Generate .bin</button>
+    <p id="status"></p>
+    <a id="downloadLink" download="firmware.bin">Download .bin</a>
+
+    <script>
+        async function generateBin() {
+            const code = document.getElementById("code").value;
+            const button = document.getElementById("compileButton");
+            const statusText = document.getElementById("status");
+            const downloadLink = document.getElementById("downloadLink");
+
+            // Cek apakah textarea kosong
+            if (!code.trim()) {
+                statusText.innerText = "Error: Kode tidak boleh kosong!";
+                return;
+            }
+
+            // Nonaktifkan tombol saat proses berjalan
+            button.disabled = true;
+            button.innerText = "Compiling...";
+            statusText.innerText = "Compiling... Mohon tunggu.";
+
+            try {
+                const response = await fetch("http://localhost:5001/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Compilation failed");
+                }
+
+                // Konversi response menjadi blob (file)
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                // Tampilkan link download
+                downloadLink.href = url;
+                downloadLink.style.display = "inline-block";
+                downloadLink.innerText = "Download .bin";
+
+                statusText.innerText = "Compilation successful!";
+            } catch (error) {
+                statusText.innerText = "Error: " + error.message;
+            } finally {
+                // Aktifkan kembali tombol setelah selesai
+                button.disabled = false;
+                button.innerText = "Generate .bin";
+            }
+        }
+    </script>
+</body>
+</html>
