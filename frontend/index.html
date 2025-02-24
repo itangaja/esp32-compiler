@@ -18,9 +18,7 @@
     <h1>ESP32 Web Compiler</h1>
     <textarea id="code" placeholder="Masukkan kode C++ di sini..."></textarea><br>
     <button id="compileButton" onclick="generateBin()">Generate .bin</button>
-    <p id="status"></p>
-    <a id="downloadLink" download="firmware.bin">Download .bin</a>
-
+    
     <script>
         async function generateBin() {
             const code = document.getElementById("code").value;
