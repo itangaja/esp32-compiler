@@ -23,6 +23,40 @@ app.get("/", (req, res) => {
 const projectsDir = path.join(__dirname, "projects");
 fs.ensureDirSync(projectsDir);
 
+// Fungsi untuk mengecek apakah perintah tersedia di sistem
+const isCommandAvailable = async (command) => {
+    try {
+        await execPromise(`${command} --version`);
+        return true;
+    } catch (error) {
+        return false;
+    }
+};
+
+// Fungsi untuk mengecek dan menginstal PlatformIO jika belum ada
+const checkAndInstallPlatformIO = async () => {
+    console.log("Mengecek Python dan PlatformIO...");
+
+    const pythonAvailable = await isCommandAvailable("python3");
+    if (!pythonAvailable) {
+        throw new Error("Python3 tidak ditemukan! Silakan install Python3 terlebih dahulu.");
+    }
+
+    const pioAvailable = await isCommandAvailable("pio");
+    if (!pioAvailable) {
+        console.log("PlatformIO tidak ditemukan. Menginstal PlatformIO...");
+        try {
+            await execPromise("pip install platformio");
+            console.log("PlatformIO berhasil diinstal!");
+        } catch (error) {
+            throw new Error("Gagal menginstal PlatformIO. Pastikan pip sudah terinstal dan coba lagi.");
+        }
+    } else {
+        console.log("PlatformIO sudah terinstal.");
+    }
+};
+
+// Endpoint untuk generate firmware
 app.post("/generate", async (req, res) => {
     const { code } = req.body;
 
@@ -36,6 +70,9 @@ app.post("/generate", async (req, res) => {
     const iniFilePath = path.join(projectPath, "platformio.ini");
 
     try {
+        // Pastikan PlatformIO terinstal sebelum melanjutkan
+        await checkAndInstallPlatformIO();
+
         await fs.ensureDir(srcPath);
         await fs.writeFile(mainFilePath, code);
 
@@ -75,7 +112,7 @@ lib_deps =
         }
     } catch (err) {
         console.error("Error:", err);
-        return res.status(500).json({ error: "Internal server error", details: err.message });
+        return res.status(500).json({ error: err.message });
     }
 });
 
